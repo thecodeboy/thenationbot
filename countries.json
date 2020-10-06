@@ -3,7 +3,7 @@
         "id": 1,
         "country_name": "Afghanistan",
         "country_code": "AF",
-        "description": "is a landlocked Asian country with history that dates back to antiquity",
+        "description": "It is a landlocked Asian country with history that dates back to antiquity.",
         "wiki": "https://en.wikipedia.org/wiki/Afghanistan"
     },
     {
@@ -1501,8 +1501,8 @@
         "id": 215,
         "country_name": "Switzerland",
         "country_code": "CH",
-        "description": "",
-        "wiki": ""
+        "description": "A small country found north of Italy renowned for its scenic mountains and chocolates.",
+        "wiki": "https://en.wikipedia.org/wiki/Switzerland"
     },
     {
         "id": 216,
