@@ -1,31 +1,77 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"os"
+	"time"
 
 	"github.com/ChimeraCoder/anaconda"
 )
 
-func main() {
-	fmt.Println("Starting bot...")
-	s := `Montenegro - a small and placid country with beautific scenic hills 
-	#country #world #nation #learn
-	https://en.wikipedia.org/wiki/Montenegro`
-	tweetCurrent(s)
+// Country conforms to the individual datatype in countries.json
+type Country struct {
+	ID          int    `json:"id"`
+	Name        string `json:"country_name"`
+	Code        string `json:"country_code"`
+	Description string `json:"description"`
+	Wiki        string `json:"wiki"`
 }
 
-func tweetCurrent(o string) {
-	fmt.Println("Preparing to tweet...")
-	// api := anaconda.NewTwitterApiWithCredentials(config.Token, config.TokenSecret, config.ConsumerKey, config.ConsumerSecret)
-	api := anaconda.NewTwitterApiWithCredentials("1311355556448186368-ypEFB6gZRmW7SL2oQfEdgP0br0Od1N",
-		"oEGamPqmK5eN81NNMnCt0EhaU1I1xCwvgIdHfI9024BHZ",
-		"bkDXjE0qF5QuhnfZ5S0jxy1MQ",
-		"nLmey0RtnfhwzDpKRrElSsW0YjY5f0wulWRqssmmOB0phDp63B")
-	tweet, err := api.PostTweet(o, nil)
+func main() {
+	log.Println("Starting Bot")
+
+	// Reading array of countries as string
+	file, err := ioutil.ReadFile("countries.json")
 	if err != nil {
-		fmt.Println("update error:", err)
+		log.Fatalln(err)
+	}
+
+	// Making array of Country structs
+	countries := make([]Country, 0)
+	json.Unmarshal([]byte(file), &countries)
+
+	// Generating ID of country to tweet about
+	rand.Seed(time.Now().UnixNano())
+	chosenCountryID := rand.Intn(len(countries))
+	tweet := prepareTweet(countries[chosenCountryID])
+	log.Println(tweet)
+
+	sendTweet(tweet)
+
+	log.Println("Stopping Bot")
+}
+
+// Generating the tweet text
+// TODO - use string.Builder instead
+func prepareTweet(country Country) string {
+	log.Println("Preparing tweet about " + country.Name)
+	tweet := country.Name
+	if len(country.Description) != 0 {
+		tweet += " - " + country.Description
+	}
+	if len(country.Wiki) != 0 {
+		tweet += " - " + country.Wiki
+	}
+	return tweet
+}
+
+// Sending prepared tweet
+func sendTweet(tweet string) {
+	log.Println("Preparing to send tweet")
+
+	os.Getenv("FOO")
+
+	// Bootstrapping API client
+	api := anaconda.NewTwitterApiWithCredentials(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"),
+		os.Getenv("CONSUMERKEY"), os.Getenv("CONSUMERSECRET"))
+
+	_, err := api.PostTweet(tweet, nil)
+	if err != nil {
+		log.Fatalln("Error posting tweet: ", err)
 	} else {
-		fmt.Println("Tweet posted:")
-		fmt.Println(tweet.Text)
+		log.Println("Tweet sent successfully")
 	}
 }
