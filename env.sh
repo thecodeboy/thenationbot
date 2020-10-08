@@ -1,0 +1,4 @@
+export TOKEN=
+export TOKENSECRET=
+export CONSUMERKEY=
+export CONSUMERSECRET=

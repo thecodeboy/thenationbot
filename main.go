@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/kelseyhightower/envconfig"
 )
 
 // Country conforms to the individual datatype in countries.json
@@ -20,8 +20,26 @@ type Country struct {
 	Wiki        string `json:"wiki"`
 }
 
+// Secret stores the API keys and tokens
+type Secret struct {
+	Token          string
+	TokenSecret    string
+	ConsumerKey    string
+	ConsumerSecret string
+}
+
 func main() {
 	log.Println("Starting Bot")
+
+	log.Println("Loading API keys")
+
+	// Loading secrets from below exported environment variables
+	// TOKEN, TOKENSECRET, CONSUMERKEY, CONSUMERSECRET
+	var secret Secret
+	err := envconfig.Process("", &secret)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 	// Reading array of countries as string
 	file, err := ioutil.ReadFile("countries.json")
@@ -39,7 +57,7 @@ func main() {
 	tweet := prepareTweet(countries[chosenCountryID])
 	log.Println(tweet)
 
-	sendTweet(tweet)
+	sendTweet(tweet, secret)
 
 	log.Println("Stopping Bot")
 }
@@ -59,14 +77,12 @@ func prepareTweet(country Country) string {
 }
 
 // Sending prepared tweet
-func sendTweet(tweet string) {
+func sendTweet(tweet string, secret Secret) {
 	log.Println("Preparing to send tweet")
 
-	os.Getenv("FOO")
-
 	// Bootstrapping API client
-	api := anaconda.NewTwitterApiWithCredentials(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"),
-		os.Getenv("CONSUMERKEY"), os.Getenv("CONSUMERSECRET"))
+	api := anaconda.NewTwitterApiWithCredentials(secret.Token, secret.TokenSecret,
+		secret.ConsumerKey, secret.ConsumerSecret)
 
 	_, err := api.PostTweet(tweet, nil)
 	if err != nil {
